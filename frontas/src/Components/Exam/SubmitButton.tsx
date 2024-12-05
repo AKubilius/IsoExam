@@ -13,7 +13,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ onSubmit }) => {
       onClick={onSubmit}
       style={{ marginTop: "20px", display: "block" }} // Ensure visibility and spacing
     >
-      Submit Answers
+      Pateikti atsakymus
     </Button>
   );
 };

@@ -1,33 +1,42 @@
 import React from "react";
 import { Button } from "@mui/material";
-import { getRequest } from "../Api/Api"; // Import the getRequest function
+import { postRequest } from "../Api/Api"; // Update this to POST
 
-const DownloadButton: React.FC = () => {
-    const handleDownload = async () => {
-        try {
-          // Make the API call using getRequest with responseType: "blob"
-          const response = await getRequest("api/Upload/export", "", "blob");
-      
-          // Create a blob from the response data and download it
-          const blob = new Blob([response], {
-            type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          });
-          const urlBlob = window.URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = urlBlob;
-          link.download = "UserAnswersReport.docx";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link); // Clean up the link element
-        } catch (error) {
-          console.error("Error downloading the file:", error);
-        }
+interface DownloadButtonProps {
+  riskAddressed: number;
+  checkedControls: { [key: string]: boolean };
+}
+
+const DownloadButton: React.FC<DownloadButtonProps> = ({ riskAddressed, checkedControls }) => {
+  const handleDownload = async () => {
+    try {
+      const requestBody = {
+        risk: riskAddressed,
+        checkedControls,
       };
-      
+
+      // Make the API call using postRequest
+      const response = await postRequest("api/Upload/export", requestBody, "blob");
+
+      // Create a blob from the response data and download it
+      const blob = new Blob([response], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+      const urlBlob = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = urlBlob;
+      link.download = "UserAnswersReport.docx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link); // Clean up the link element
+    } catch (error) {
+      console.error("Error downloading the file:", error);
+    }
+  };
 
   return (
-    <Button variant="contained" color="primary" onClick={handleDownload}>
-      Download Answers as Word
+    <Button variant="contained" color="primary" sx={{ marginTop: "10px" }} onClick={handleDownload}>
+      Parsisiųsti ataskaitą
     </Button>
   );
 };

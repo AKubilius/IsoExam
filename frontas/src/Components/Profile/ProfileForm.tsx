@@ -1,14 +1,8 @@
 import React from 'react';
-import {
-  Box,
-  Avatar,
-  IconButton,
-  Typography,
-  TextField,
-  Button,
-} from '@mui/material';
+import { Box, IconButton, Typography, TextField, Button, Container } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close'; // Import the "X" icon
 
 interface ProfileFormProps {
   profile: {
@@ -20,6 +14,7 @@ interface ProfileFormProps {
   isEditing: boolean;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleEditClick: () => void;
+  handleCancelClick: () => void; // Add cancel button handler
 }
 
 const ProfileForm: React.FC<ProfileFormProps> = ({
@@ -27,27 +22,34 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   isEditing,
   handleInputChange,
   handleEditClick,
+  handleCancelClick, // Destructure cancel handler
 }) => {
   return (
+    <Container>
     <Box>
-      {/* Avatar and Edit Button */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-        <Avatar
-          alt={profile.name}
-          src="https://source.unsplash.com/random/100x100"
-          sx={{ width: 100, height: 100 }}
-        />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 1,
+          mb: 4,
+        }}
+      >
         <IconButton color="primary" onClick={handleEditClick} sx={{ mt: 2 }}>
           {isEditing ? <SaveIcon /> : <EditIcon />}
         </IconButton>
+        {isEditing && (
+          <IconButton color="secondary" onClick={handleCancelClick} sx={{ mt: 2 }}>
+            <CloseIcon />
+          </IconButton>
+        )}
       </Box>
 
-      {/* Profile Information */}
       <Typography variant="h5" align="center" gutterBottom>
-        {isEditing ? 'Edit Profile' : 'Profile'}
+        {isEditing ? 'Redaguoti profilį' : 'Profilis'}
       </Typography>
 
-      {/* Form Fields */}
       <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField
           label="Name"
@@ -77,7 +79,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           fullWidth
         />
         <TextField
-          label="Company name"
+          label="Company Name"
           name="companyName"
           value={profile.companyName || ''}
           onChange={handleInputChange}
@@ -85,20 +87,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           disabled={!isEditing}
           fullWidth
         />
-
-        {/* Save Changes Button */}
-        {isEditing && (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleEditClick}
-            sx={{ alignSelf: 'center', mt: 2 }}
-          >
-            Save Changes
-          </Button>
-        )}
       </Box>
     </Box>
+    </Container>
   );
 };
 

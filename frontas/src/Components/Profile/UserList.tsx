@@ -66,8 +66,9 @@ const UserList: React.FC = () => {
     // Handle saving changes
     const handleSaveClick = async () => {
         if (selectedUser) {
+            console.log(selectedUser)
             try {
-                const updatedUser = await makePutRequest(`/api/Users/${selectedUser.id}`, selectedUser);
+                const updatedUser = await makePutRequest(`/api/User/${selectedUser.id}`, selectedUser);
                 setUsers((prevUsers) =>
                     prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user))
                 );
@@ -82,7 +83,7 @@ const UserList: React.FC = () => {
     // Handle deleting a user
     const handleDeleteClick = async (userId: number) => {
         try {
-            await makeDeleteRequest(`/api/Users/${userId}`);
+            await makeDeleteRequest(`/api/User/${userId}`);
             setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
             if (selectedUser?.id === userId) {
                 setSelectedUser(null); // Clear selected user if they are deleted

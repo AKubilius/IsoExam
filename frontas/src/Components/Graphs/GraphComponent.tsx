@@ -1,9 +1,12 @@
-// GraphComponent.tsx
-
 import Box from '@mui/material/Box/Box';
 import React, { useEffect, useState } from 'react';
 import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'; // Import necessary components
 import { calculateMetrics } from "../CalculateMetrics/CalculateMetrics";
+
+// Register the Chart.js components
+ChartJS.register(ArcElement, Tooltip, Legend);
+
 interface GraphComponentProps {
   questions: Question[];
   answers: Answer[];
@@ -35,6 +38,7 @@ const GraphComponent: React.FC<GraphComponentProps> = ({ questions, answers }) =
   useEffect(() => {
     const { riskPercentages } = calculateMetrics(answers);
     setRiskPercentages(riskPercentages);
+    console.log(riskPercentages);
   }, [answers]);
 
   const graphData = {
@@ -49,8 +53,6 @@ const GraphComponent: React.FC<GraphComponentProps> = ({ questions, answers }) =
 
   return (
     <Box>
-      <h3>Graph Placeholder</h3>
-      <p>Number of Questions: {questions.length}</p>
       <Box height={500}>
         <Pie data={graphData} />
       </Box>

@@ -1,92 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Avatar,
-  Paper,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import SaveIcon from '@mui/icons-material/Save';
-import { getRequest } from '../Api/Api'; // Import your API function
-import ExamAttemptsDisplay from './ExamAttemptDisplay';
+import axios from 'axios';
 import ProfileForm from './ProfileForm';
+import { getRequest, makePutRequest } from '../Api/Api';
 import DownloadButton from '../FileUpload/DownloadButton';
 import UserList from './UserList';
+import Container from '@mui/material/Container/Container';
+import Paper from '@mui/material/Paper/Paper';
+import { Box } from '@mui/material';
 
-interface Answer {
-  questionId: number;
-  policyDefined: string;
-  controlImplemented: string;
-  controlAutomated: string;
-  controlReported: string;
-}
-
-interface ExamAttempt {
-  id: number;
-  attemptedAt: string;
-  timeTaken: string;
-  score: number;
-  status: string;
-  answers: Answer[];
-}
-
-const Profile: React.FC = () => {
-  // User profile data
+const ProfilePage: React.FC = () => {
   const [profile, setProfile] = useState({
     name: '',
     email: '',
-    bio: '',
-    position:'',
-    companyName:''
+    position: '',
+    companyName: '',
   });
-
-  // User's exam attempts
-  const [examAttempts, setExamAttempts] = useState<ExamAttempt[]>([]);
-
   const [isEditing, setIsEditing] = useState(false);
+  const [originalProfile, setOriginalProfile] = useState(profile); // Store original profile
 
-  const isAdmin = sessionStorage.getItem('admin') === 'true';
-  const Admin = sessionStorage.getItem('admin')
-console.log(Admin);
-  // Fetch user profile and exam attempts on component mount
+  const isAdmin = sessionStorage.getItem('admin') === 'true'
+console.log(isAdmin)
+
+  // Fetch user data from the API
   useEffect(() => {
-    const fetchProfileAndAttempts = async () => {
+    const fetchUser = async () => {
       try {
-        // Fetch user profile data (assumes profileData includes both user details and examAttempts)
         const profileData = await getRequest('/api/User', '');
-  
-        // Extract and set profile details
-        const userProfile = {
-          name: profileData.name || '',
-          email: profileData.email || '',
-          bio: profileData.bio || '',
-          position: profileData.position || '',
-          companyName: profileData.companyName || '',
-        };
-        setProfile(userProfile);
-  
-        // Extract and set exam attempts
-        const userExamAttempts = profileData.examAttempts || [];
-        setExamAttempts(userExamAttempts);
-  
-        console.log('Profile:', userProfile);
-        console.log('Exam Attempts:', userExamAttempts);
+        setProfile(profileData);
+        setOriginalProfile(profileData); // Save original profile
       } catch (error) {
-        console.error('Error fetching profile or exam attempts:', error);
+        console.error('Failed to fetch user:', error);
       }
     };
-  
-    fetchProfileAndAttempts();
+    fetchUser();
   }, []);
 
-  // Handle input change
+  // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfile((prevProfile) => ({
@@ -94,35 +43,47 @@ console.log(Admin);
       [name]: value,
     }));
   };
+   // Handle cancel button click
+   const handleCancelClick = () => {
+    setProfile(originalProfile); // Revert to original profile
+    setIsEditing(false); // Exit editing mode
+  };
 
-  // Toggle editing mode
-  const handleEditClick = () => {
-    setIsEditing((prevEditing) => !prevEditing);
-    // Save changes to backend when exiting edit mode
+  // Handle edit/save button click
+  const handleEditClick = async () => {
     if (isEditing) {
-      // Call API to save changes
-      console.log('Save profile changes:', profile);
+      try {
+        const response = await makePutRequest('/api/User/edit', profile);
+      setProfile(response); // If makePutRequest already returns `data`
+        alert('Profile updated successfully!');
+      } catch (error) {
+        console.error('Failed to update user:', error);
+        alert('Error updating profile. Please try again.');
+      }
     }
+    setIsEditing(!isEditing);
   };
 
   return (
     <Container maxWidth="sm">
-      <Paper sx={{ padding: 4, marginTop: 4 }}>
+    <Paper sx={{ padding: 4, marginTop: 4 }}>
+      <Box sx={{display:'flex',flexDirection:'column'}}>
       <ProfileForm
-          profile={profile}
-          isEditing={isEditing}
-          handleInputChange={handleInputChange}
-          handleEditClick={handleEditClick}
-        />
-        <DownloadButton/>
-        {isAdmin && <UserList />}
-        {/* Exam Attempts Section */}
-        <Box sx={{ marginTop: 4 }}>
-          <ExamAttemptsDisplay examAttempts={examAttempts} />;
-        </Box>
-      </Paper>
-    </Container>
+
+profile={profile}
+isEditing={isEditing}
+handleInputChange={handleInputChange}
+handleEditClick={handleEditClick}
+handleCancelClick={handleCancelClick} // Pass cancel handler
+/>
+
+</Box>
+{isAdmin && <UserList />}
+
+    </Paper>
+  </Container>
+    
   );
 };
 
-export default Profile;
+export default ProfilePage;

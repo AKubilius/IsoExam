@@ -54,9 +54,11 @@ const BarComponent: React.FC<BarComponentProps> = ({ questions, answers }) => {
       const groupAnswers = answers.filter(answer => questionIds.includes(answer.questionId));
 
       // Count how many answers have "Implemented on All Systems"
-      const fullyImplementedCount = groupAnswers.filter(
-        answer => answer.controlImplemented === "Implemented on All Systems"
-      ).length;
+      // Count how many answers have "Įgyvendinta visose sistemose"
+const fullyImplementedCount = groupAnswers.filter(
+  answer => answer.controlImplemented === "Įgyvendinta visose sistemose" // Updated string
+).length;
+
 
       // Calculate percentage
       const percentage = (fullyImplementedCount / totalQuestions) * 100;
@@ -69,7 +71,7 @@ const BarComponent: React.FC<BarComponentProps> = ({ questions, answers }) => {
       labels: groupPercentages.map(item => item.group),
       datasets: [
         {
-          label: 'Control Implemented (%)',
+          label: 'Įgyvendinta kontrolė (%)',
           data: groupPercentages.map(item => item.percentage),
           backgroundColor: 'rgba(54, 162, 235, 0.6)',
           borderColor: 'rgba(54, 162, 235, 1)',
@@ -85,8 +87,8 @@ const BarComponent: React.FC<BarComponentProps> = ({ questions, answers }) => {
 
   return (
     <Box>
-      <h3>Control Implementation Percentage by Group</h3>
-      <Box height={500}>
+      <h3 style={{ textAlign: 'center' }}>Kontrolių įgyvendinimo procentas pagal grupę</h3>
+      <Box height={500} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Bar
           data={barData}
           options={{
@@ -97,13 +99,13 @@ const BarComponent: React.FC<BarComponentProps> = ({ questions, answers }) => {
                 max: 100,
                 title: {
                   display: true,
-                  text: 'Percentage (%)',
+                  text: 'Procentas(%)',
                 },
               },
               x: {
                 title: {
                   display: true,
-                  text: 'Groups',
+                  text: 'Grupės',
                 },
               },
             },
@@ -112,6 +114,8 @@ const BarComponent: React.FC<BarComponentProps> = ({ questions, answers }) => {
       </Box>
     </Box>
   );
+  
+  
 };
 
 export default BarComponent;

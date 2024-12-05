@@ -24,8 +24,6 @@ interface Answer {
 interface QuestionProps {
   questionId: number;
   questionText: string;
-  nistCategory: string;
-  implementationGroups: string;
   policyDefined: string;
   controlImplemented: string;
   controlAutomated: string;
@@ -40,12 +38,10 @@ interface QuestionProps {
 const Question: React.FC<QuestionProps> = ({
   questionId,
   questionText,
-  nistCategory,
-  implementationGroups,
-  policyDefined = "No Policy", // Default value to the first MenuItem
-  controlImplemented = "Not Implemented", // Default value to the first MenuItem
-  controlAutomated = "Not Automated", // Default value to the first MenuItem
-  controlReported = "Not Reported", // Default value to the first MenuItem
+  policyDefined = "Nėra politikos", // Default value to the first MenuItem
+  controlImplemented = "Neįgyvendinta", // Default value to the first MenuItem
+  controlAutomated = "Neautomatizuota", // Default value to the first MenuItem
+  controlReported = "Nepranešta", // Default value to the first MenuItem
   isBlocked,
   onAnswerChange
 }) => {
@@ -57,183 +53,182 @@ const Question: React.FC<QuestionProps> = ({
     setExpanded(!expanded);
   };
 
-
   // Function to get color based on status
   const getStatusColor = (status: string): string => {
     switch (status) {
       // Red statuses
-      case "No Policy":
-      case "Not Implemented":
-      case "Not Automated":
-      case "Not Reported":
-        return "#ff5252"; // Bright red
-  
-      // Orange statuses
-      case "Informal Policy":
-      case "Parts of Policy Implemented":
-      case "Parts of Policy Automated":
-      case "Parts of Policy Reported":
-        return "#ffa726"; // Darker orange
-  
-      // Yellow statuses (darker)
-      case "Partial Written Policy":
-      case "Implemented on Some Systems":
-      case "Automated on Some Systems":
-      case "Reported on Some Systems":
-        return "#fdd835"; // Darker yellow
-  
-      // Light Green statuses (darker)
-      case "Written Policy":
-      case "Implemented on Most Systems":
-      case "Automated on Most Systems":
-      case "Reported on Most Systems":
-        return "#66bb6a"; // Darker light green
-  
       // Green statuses
-      case "Approved Written Policy":
-      case "Implemented on All Systems":
-      case "Automated on All Systems":
-      case "Reported on All Systems":
+      case "Nėra politikos":
+        case "Neįgyvendinta":
+        case "Neautomatizuota":
+        case "Nepranešta":
+        return "#ff5252"; // Bright red
+
+      // Orange statuses
+      case "Neformali politika":
+    case "Dalis politikos įgyvendinta":
+    case "Dalis politikos automatizuota":
+    case "Dalis politikos pranešta":
+        return "#ffa726"; // Darker orange
+
+      // Yellow statuses (darker)
+      case "Iš dalies parašyta politika":
+        case "Įgyvendinta kai kuriose sistemose":
+        case "Automatizuota kai kuriose sistemose":
+        case "Pranešta kai kuriose sistemose":
+        
+        return "#fdd835"; // Darker yellow
+
+      // Light Green statuses (darker)
+      case "Parašyta politika":
+    case "Įgyvendinta daugumoje sistemų":
+    case "Automatizuota daugumoje sistemų":
+    case "Pranešta daugumoje sistemų":
+        return "#66bb6a"; // Darker light green
+
+      // Green statuses
+      case "Patvirtinta parašyta politika":
+        case "Įgyvendinta visose sistemose":
+        case "Automatizuota visose sistemose":
+        case "Pranešta visose sistemose":
+    
         return "#43a047"; // Green
-  
+
       // Default color for unknown statuses
       default:
         return "gray";
     }
   };
-  
-  
 
   return (
     <Card sx={{ marginBottom: 2 }}>
-    <CardHeader
-      title={`Question ${questionId}`}
-      subheader={nistCategory}
-      onClick={toggleAccordion}
-      sx={{ cursor: "pointer", backgroundColor: "#f5f5f5" }}
-    />
-    <Collapse in={expanded}>
-      <CardContent>
-        <Typography variant="body1" gutterBottom>
-          {questionText}
-        </Typography>
+      <CardHeader
+        title={`Teiginys ${questionId}`}
+        onClick={toggleAccordion}
+        sx={{ cursor: "pointer", backgroundColor: "#f5f5f5" }}
+      />
+      <Collapse in={expanded}>
+        <CardContent>
+          <Typography variant="body1" gutterBottom>
+            {questionText}
+          </Typography>
 
-        <Typography variant="body2" gutterBottom>
-          <strong>Implementation Groups:</strong> {implementationGroups}
-        </Typography>
+          {/* Policy Defined Dropdown */}
+          <FormControl fullWidth sx={{ marginTop: 2 }}>
+            <InputLabel id={`policy-defined-label-${questionId}`}>Politika apibrėžta</InputLabel>
+            <Select
+              labelId={`policy-defined-label-${questionId}`}
+              value={policyDefined || "Nėra politikos"} // Default value if empty
+              label="Policy Defined"
+              onChange={(event: SelectChangeEvent<string>) =>
+                onAnswerChange("policyDefined", event.target.value)
+              }
+            >
+              <MenuItem value="Nėra politikos">Nėra politikos</MenuItem>
+              <MenuItem value="Neformali politika">Neformali politika</MenuItem>
+              <MenuItem value="Iš dalies parašyta politika">Iš dalies parašyta politika</MenuItem>
+              <MenuItem value="Parašyta politika">Parašyta politika</MenuItem>
+              <MenuItem value="Patvirtinta parašyta politika">Patvirtinta parašyta politika</MenuItem>
+            </Select>
+          </FormControl>
 
-        {/* Policy Defined Dropdown */}
-        <FormControl fullWidth sx={{ marginTop: 2 }}>
-          <InputLabel id={`policy-defined-label-${questionId}`}>Policy Defined</InputLabel>
-          <Select
-            labelId={`policy-defined-label-${questionId}`}
-            value={policyDefined || "No Policy"} // Default value if empty
-            label="Policy Defined"
-            onChange={(event: SelectChangeEvent<string>) =>
-              onAnswerChange("policyDefined", event.target.value)
-            }
-          >
-            <MenuItem value="No Policy">No Policy</MenuItem>
-            <MenuItem value="Informal Policy">Informal Policy</MenuItem>
-            <MenuItem value="Partial Written Policy">Partial Written Policy</MenuItem>
-            <MenuItem value="Written Policy">Written Policy</MenuItem>
-            <MenuItem value="Approved Written Policy">Approved Written Policy</MenuItem>
-          </Select>
-        </FormControl>
 
-        {/* Control Implemented Dropdown */}
-        <FormControl fullWidth sx={{ marginTop: 2 }}>
-          <InputLabel id={`control-implemented-label-${questionId}`}>Control Implemented</InputLabel>
-          <Select
-            labelId={`control-implemented-label-${questionId}`}
-            value={controlImplemented || "Not Implemented"} // Default value if empty
-            label="Control Implemented"
-            onChange={(event: SelectChangeEvent<string>) =>
-              onAnswerChange("controlImplemented", event.target.value)
-            }
-          >
-            <MenuItem value="Not Implemented">Not Implemented</MenuItem>
-            <MenuItem value="Parts of Policy Implemented">Parts of Policy Implemented</MenuItem>
-            <MenuItem value="Implemented on Some Systems">Implemented on Some Systems</MenuItem>
-            <MenuItem value="Implemented on Most Systems">Implemented on Most Systems</MenuItem>
-            <MenuItem value="Implemented on All Systems">Implemented on All Systems</MenuItem>
-          </Select>
-        </FormControl>
+          {/* Control Implemented Dropdown */}
+          <FormControl fullWidth sx={{ marginTop: 2 }}>
+            <InputLabel id={`control-implemented-label-${questionId}`}>Valdymas įgyvendintas</InputLabel>
+            <Select
+              labelId={`control-implemented-label-${questionId}`}
+              value={controlImplemented || "Neįgyvendinta"} // Default value if empty
+              label="Control Implemented"
+              onChange={(event: SelectChangeEvent<string>) =>
+                onAnswerChange("controlImplemented", event.target.value)
+              }
+            >
 
-        {/* Control Automated Dropdown */}
-        <FormControl fullWidth sx={{ marginTop: 2 }}>
-          <InputLabel id={`control-automated-label-${questionId}`}>Control Automated</InputLabel>
-          <Select
-            labelId={`control-automated-label-${questionId}`}
-            value={controlAutomated || "Not Automated"} // Default value if empty
-            label="Control Automated"
-            onChange={(event: SelectChangeEvent<string>) =>
-              onAnswerChange("controlAutomated", event.target.value)
-            }
-            disabled={isBlocked} // Disable dropdown if blocked
-          >
-            <MenuItem value="Not Automated">Not Automated</MenuItem>
-            <MenuItem value="Parts of Policy Automated">Parts of Policy Automated</MenuItem>
-            <MenuItem value="Automated on Some Systems">Automated on Some Systems</MenuItem>
-            <MenuItem value="Automated on Most Systems">Automated on Most Systems</MenuItem>
-            <MenuItem value="Automated on All Systems">Automated on All Systems</MenuItem>
-          </Select>
-        </FormControl>
+              <MenuItem value="Neįgyvendinta">Neįgyvendinta</MenuItem>
+              <MenuItem value="Dalis politikos įgyvendinta">Dalis politikos įgyvendinta</MenuItem>
+              <MenuItem value="Įgyvendinta kai kuriose sistemose">Įgyvendinta kai kuriose sistemose</MenuItem>
+              <MenuItem value="Įgyvendinta daugumoje sistemų">Įgyvendinta daugumoje sistemų</MenuItem>
+              <MenuItem value="Įgyvendinta visose sistemose">Įgyvendinta visose sistemose</MenuItem>
+            </Select>
+          </FormControl>
+ 
+          {/* Control Automated Dropdown */} 
+          <FormControl fullWidth sx={{ marginTop: 2 }}>
+            <InputLabel id={`control-automated-label-${questionId}`}>Valdymas automatizuotas</InputLabel>
+            <Select
+              labelId={`control-automated-label-${questionId}`}
+              value={controlAutomated || "Neautomatizuota"} // Default value if empty
+              label="Control Automated"
+              onChange={(event: SelectChangeEvent<string>) =>
+                onAnswerChange("controlAutomated", event.target.value)
+              }
+              disabled={isBlocked} // Disable dropdown if blocked
+            >
 
-        {/* Control Reported Dropdown */}
-        <FormControl fullWidth sx={{ marginTop: 2 }}>
-          <InputLabel id={`control-reported-label-${questionId}`}>Control Reported</InputLabel>
-          <Select
-            labelId={`control-reported-label-${questionId}`}
-            value={controlReported || "Not Reported"} // Default value if empty
-            label="Control Reported"
-            onChange={(event: SelectChangeEvent<string>) =>
-              onAnswerChange("controlReported", event.target.value)
-            }
-            disabled={isBlocked} // Disable dropdown if blocked
-          >
-            <MenuItem value="Not Reported">Not Reported</MenuItem>
-            <MenuItem value="Parts of Policy Reported">Parts of Policy Reported</MenuItem>
-            <MenuItem value="Reported on Some Systems">Reported on Some Systems</MenuItem>
-            <MenuItem value="Reported on Most Systems">Reported on Most Systems</MenuItem>
-            <MenuItem value="Reported on All Systems">Reported on All Systems</MenuItem>
-          </Select>
-        </FormControl>
+              <MenuItem value="Neautomatizuota">Neautomatizuota</MenuItem>
+              <MenuItem value="Dalis politikos automatizuota">Dalis politikos automatizuota</MenuItem>
+              <MenuItem value="Automatizuota kai kuriose sistemose">Automatizuota kai kuriose sistemose</MenuItem>
+              <MenuItem value="Automatizuota daugumoje sistemų">Automatizuota daugumoje sistemų</MenuItem>
+              <MenuItem value="Automatizuota visose sistemose">Automatizuota visose sistemose</MenuItem>
+            </Select>
+          </FormControl>
+    
+          {/* Control Reported Dropdown */}
+          <FormControl fullWidth sx={{ marginTop: 2 }}>
+            <InputLabel id={`control-reported-label-${questionId}`}>Valdymas praneštas</InputLabel>
+            <Select
+              labelId={`control-reported-label-${questionId}`}
+              value={controlReported || "Nepranešta"} // Default value if empty
+              label="Control Reported"
+              onChange={(event: SelectChangeEvent<string>) =>
+                onAnswerChange("controlReported", event.target.value)
+              }
+              disabled={isBlocked} // Disable dropdown if blocked
+            >
 
-         {/* Status Chips */}
-<div style={{ marginTop: 10 }}>
-  <Chip
-    label={policyDefined || "No Policy"} // Default value if not set
-    sx={{
-      backgroundColor: getStatusColor(policyDefined || "No Policy"), // Ensure default color
-      color: "white",
-      marginRight: 1,
-    }}
-  />
-  <Chip
-    label={controlImplemented || "Not Implemented"} // Default value if not set
-    sx={{
-      backgroundColor: getStatusColor(controlImplemented || "Not Implemented"), // Ensure default color
-      color: "white",
-      marginRight: 1,
-    }}
-  />
-  <Chip
-    label={controlAutomated || "Not Automated"} // Default value if not set
-    sx={{
-      backgroundColor: getStatusColor(controlAutomated || "Not Automated"), // Ensure default color
-      color: "white",
-      marginRight: 1,
-    }}
-  />
-  <Chip
-    label={controlReported || "Not Reported"} // Default value if not set
-    sx={{
-      backgroundColor: getStatusColor(controlReported || "Not Reported"), // Ensure default color
-      color: "white",
-    }}
-  />
-</div>
+              <MenuItem value="Nepranešta">Nepranešta</MenuItem>
+              <MenuItem value="Dalis politikos pranešta">Dalis politikos pranešta</MenuItem>
+              <MenuItem value="Pranešta kai kuriose sistemose">Pranešta kai kuriose sistemose</MenuItem>
+              <MenuItem value="Pranešta daugumoje sistemų">Pranešta daugumoje sistemų</MenuItem>
+              <MenuItem value="Pranešta visose sistemose">Pranešta visose sistemose</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* Status Chips */}
+          <div style={{ marginTop: 10 }}>
+            <Chip
+              label={policyDefined || "Nėra politikos"} // Default value if not set
+              sx={{
+                backgroundColor: getStatusColor(policyDefined || "Nėra politikos"), // Ensure default color
+                color: "white",
+                marginRight: 1,
+              }}
+            />
+            <Chip
+              label={controlImplemented || "Neįgyvendinta"} // Default value if not set
+              sx={{
+                backgroundColor: getStatusColor(controlImplemented || "Neįgyvendinta"), // Ensure default color
+                color: "white",
+                marginRight: 1,
+              }}
+            />
+            <Chip
+              label={controlAutomated || "Neautomatizuota"} // Default value if not set
+              sx={{
+                backgroundColor: getStatusColor(controlAutomated || "Neautomatizuota"), // Ensure default color
+                color: "white",
+                marginRight: 1,
+              }}
+            />
+            <Chip
+              label={controlReported || "Nepranešta"} // Default value if not set
+              sx={{
+                backgroundColor: getStatusColor(controlReported || "Nepranešta"), // Ensure default color
+                color: "white",
+              }}
+            />
+          </div>
         </CardContent>
       </Collapse>
     </Card>

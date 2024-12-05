@@ -45,9 +45,8 @@ async function makePostRequest(url: string, postData: any) {
 
 async function makePutRequest(url: string, postData: any) {
   const authorizationToken = `Bearer ${sessionStorage.getItem("token")}`;
-
   try {
-    const { data } = await axios.put<any>(url, postData, {
+    const { data } = await api.put<any>(url, postData, {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -66,7 +65,7 @@ async function makeDeleteRequest(url: string) {
   const authorizationToken = `Bearer ${sessionStorage.getItem("token")}`;
 
   try {
-    const { data, status } = await axios.delete<any>(url, {
+    const { data, status } = await api.delete<any>(url, {
       headers: {
         Accept: "application/json",
         Authorization: authorizationToken,
@@ -97,5 +96,20 @@ export const logout = () => {
   window.location.href = '/home';
 };
 
+export const postRequest = async (url: string, data: any, responseType: ResponseType = "json") => {
+  const authorizationToken = `Bearer ${sessionStorage.getItem("token")}`;
+  const response = await api.post(url, data, {
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: authorizationToken, // Add the token
+    },
+    responseType, // Use the correct type
+  });
+  
+  
+
+  return responseType === "blob" ? response.data : response;
+};
 
 export { api, authConfig, makePostRequest, makeDeleteRequest,getRequest,makePutRequest};

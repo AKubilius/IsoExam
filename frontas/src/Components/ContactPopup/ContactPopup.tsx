@@ -19,9 +19,10 @@ const ContactPopup: React.FC = () => {
     setNames("");
     setMessage("");
     setEmail("");
+    setCompany("");
   };
 
-  const name = localStorage.getItem("name"); // Simulating logged-in user detection
+  const logged = sessionStorage.getItem("token"); // Simulating logged-in user detection
  // New Function to Send Message Using makePostRequest
  async function sendMessageToAdmin(email: string, message: string) {
   try {
@@ -40,7 +41,7 @@ const ContactPopup: React.FC = () => {
 }
 
   const handleSubmit = async () => {
-    if (!name && !email) {
+    if (!logged && !email) {
       alert("Please enter your email address.");
       return;
     }
@@ -67,39 +68,12 @@ const ContactPopup: React.FC = () => {
       </Fab>
 
       {/* Popup Dialog */}
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog fullWidth open={open} onClose={handleClose}>
         <DialogTitle>Contact Admin</DialogTitle>
         <DialogContent>
           {/* If user is not logged in, ask for their email */}
-          {!name && (
+          {!logged && (
             <Box>
-              <TextField
-              label="Your Name"
-              fullWidth
-              variant="outlined"
-              value={names}
-              onChange={(e) => setNames(e.target.value)}
-              style={{ marginBottom: "1rem"}}
-              slotProps={{
-                inputLabel: {
-                  style: { lineHeight: "1.5" },
-                },
-              }}
-            />
-             <TextField
-              label="Your Surname"
-              fullWidth
-              variant="outlined"
-              value={surname}
-              onChange={(e) => setSurname(e.target.value)}
-              style={{ marginBottom: "1rem"}}
-              slotProps={{
-                inputLabel: {
-                  style: { lineHeight: "1.5" },
-                },
-              }}
-            />
-
               <TextField
               label="Your Email"
               type="email"
@@ -108,24 +82,6 @@ const ContactPopup: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={{ marginBottom: "1rem"}}
-              slotProps={{
-                inputLabel: {
-                  style: { lineHeight: "1.5" },
-                },
-              }}
-            />
-             <TextField
-              label="Your Company"
-              fullWidth
-              variant="outlined"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              style={{ marginBottom: "1rem"}}
-              slotProps={{
-                inputLabel: {
-                  style: { lineHeight: "1.5" },
-                },
-              }}
             />
             </Box>
           )}

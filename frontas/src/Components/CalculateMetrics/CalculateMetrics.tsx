@@ -7,29 +7,30 @@ interface Answer {
   
   export const calculateMetrics = (answers: Answer[]) => {
     const scoringMap: { [key: string]: number } = {
-      "No Policy": 0,
-      "Informal Policy": 0.25,
-      "Partial Written Policy": 0.5,
-      "Written Policy": 0.75,
-      "Approved Written Policy": 1,
-  
-      "Not Implemented": 0,
-      "Parts of Policy Implemented": 0.25,
-      "Implemented on Some Systems": 0.5,
-      "Implemented on Most Systems": 0.75,
-      "Implemented on All Systems": 1,
-  
-      "Not Automated": 0,
-      "Parts of Policy Automated": 0.25,
-      "Automated on Some Systems": 0.5,
-      "Automated on Most Systems": 0.75,
-      "Automated on All Systems": 1,
-  
-      "Not Reported": 0,
-      "Parts of Policy Reported": 0.25,
-      "Reported on Some Systems": 0.5,
-      "Reported on Most Systems": 0.75,
-      "Reported on All Systems": 1,
+     "Nėra politikos": 0,
+"Neformali politika": 0.25,
+"Iš dalies parašyta politika": 0.5,
+"Parašyta politika": 0.75,
+"Patvirtinta parašyta politika": 1,
+
+"Neįgyvendinta": 0,
+"Dalis politikos įgyvendinta": 0.25,
+"Įgyvendinta kai kuriose sistemose": 0.5,
+"Įgyvendinta daugumoje sistemų": 0.75,
+"Įgyvendinta visose sistemose": 1,
+
+"Neautomatizuota": 0,
+"Dalis politikos automatizuota": 0.25,
+"Automatizuota kai kuriose sistemose": 0.5,
+"Automatizuota daugumoje sistemų": 0.75,
+"Automatizuota visose sistemose": 1,
+
+"Nepranešta": 0,
+"Dalis politikos pranešta": 0.25,
+"Pranešta kai kuriose sistemose": 0.5,
+"Pranešta daugumoje sistemų": 0.75,
+"Pranešta visose sistemose": 1,
+
     };
   
     let totalScore = 0;

@@ -117,7 +117,7 @@ console.log(answers);
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h5" sx={{ marginBottom: 2 }}>
-        Choose a Question Group
+        Grupės
       </Typography>
       
       <GroupSelector activeGroup={activeGroup} onGroupChange={handleGroupChange} />

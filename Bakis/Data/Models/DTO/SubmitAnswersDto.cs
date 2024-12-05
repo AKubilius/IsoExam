@@ -25,4 +25,10 @@
         public ICollection<AnswerDto> Answers { get; set; }
     }
 
+    public class ExportRequest
+    {
+        public int Risk { get; set; }
+        public Dictionary<string, bool> CheckedControls { get; set; }
+    }
+
 }

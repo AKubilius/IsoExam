@@ -21,9 +21,9 @@ const Navbar: React.FC = () => {
   
   const menuItems = [
     { label: 'Pagrindinis', path: '/' },
-    { label: 'Atitiktis', path: '/exam' },
+    { label: 'CIS Kontrolės', path: '/exam' },
+    { label: 'ISO 27001 Dokumentacija', path: '/documents' },
     { label: 'Statistika', path: '/graphs' },
-    { label: 'Apie mus', path: '/apie-mus' },
   ];
 
   const logged = sessionStorage.getItem("token");
@@ -41,6 +41,8 @@ const Navbar: React.FC = () => {
           <Typography variant="body2" sx={{ display: 'inline', marginRight: '20px' }}>
             +370 629 666 56 | info@Vilius.lt
           </Typography>
+
+          {!logged && (
           <Typography variant="body2">
             <Link
               component="button"
@@ -49,7 +51,8 @@ const Navbar: React.FC = () => {
             >
               Prisijungimas / Registracija
             </Link>
-          </Typography>
+          </Typography>)}
+
         </Container>
       </Box>
 
@@ -61,7 +64,7 @@ const Navbar: React.FC = () => {
             {/* Logo */}
             <Box>
               <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', color: '#f9a825' }}>
-                V <Typography variant="h6" component="span" sx={{ fontWeight: 'bold', color: 'black', ml: 1 }}>ILIUS</Typography>
+               <Typography variant="h6" component="span" sx={{ fontWeight: 'bold', color: 'black', ml: 1 }}>ISO 27001 STANDARTO DIEGIMAS</Typography>
               </Typography>
             </Box>
 
@@ -78,7 +81,7 @@ const Navbar: React.FC = () => {
 
             {/* Icons (Search & Profile) */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {logged ? (
+            {logged && (
               <>
               <Link
                 component="button"
@@ -98,7 +101,7 @@ const Navbar: React.FC = () => {
                   ATSIJUNGTI
                 </Typography>
                 </Button>
-                </>) : <></>}
+                </>)}
                 </Box>
                 
                 

@@ -6,7 +6,7 @@ const AboutUs: React.FC = () => (
   <Box sx={{ py: 6, backgroundColor: '#f9a825', textAlign: 'center' }}>
     <Container maxWidth="sm">
       <Typography variant="h4" sx={{ mb: 2, color: 'white' }}>
-        Ready to Get Started?
+       Pasiruošę padėti?
       </Typography>
       <Typography variant="body1" sx={{ mb: 4, color: 'white' }}>
         Join us today and experience top-quality service.

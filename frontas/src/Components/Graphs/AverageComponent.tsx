@@ -34,28 +34,28 @@ const AverageGraph: React.FC<AverageGraphProps> = ({ answers }) => {
     labels: ["Metrics"], // Single label because we are using multiple datasets
     datasets: [
       {
-        label: "Policy Defined",
+        label: "Politika apibrėžta",
         data: [fieldAverages.policyDefined * 100], // Convert to percentage
         backgroundColor: "rgba(75, 192, 192, 0.6)", // Cyan color
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
       },
       {
-        label: "Control Implemented",
+        label: "Valdymas įgyvendintas",
         data: [fieldAverages.controlImplemented * 100], // Convert to percentage
         backgroundColor: "rgba(255, 99, 132, 0.6)", // Red color
         borderColor: "rgba(255, 99, 132, 1)",
         borderWidth: 1,
       },
       {
-        label: "Control Automated",
+        label: "Valdymas automatizuotas",
         data: [fieldAverages.controlAutomated * 100], // Convert to percentage
         backgroundColor: "rgba(54, 162, 235, 0.6)", // Blue color
         borderColor: "rgba(54, 162, 235, 1)",
         borderWidth: 1,
       },
       {
-        label: "Control Reported",
+        label: "Valdymas praneštas",
         data: [fieldAverages.controlReported * 100], // Convert to percentage
         backgroundColor: "rgba(255, 206, 86, 0.6)", // Yellow color
         borderColor: "rgba(255, 206, 86, 1)",
@@ -65,9 +65,11 @@ const AverageGraph: React.FC<AverageGraphProps> = ({ answers }) => {
   };
 
   return (
-    <Box >
-    <Typography>Average graph</Typography>
-      <Box height={500} display='flex'>
+    <Box>
+      <Box sx={{ textAlign: 'center', mb: 2 }}>
+        <Typography variant="h6">Vidurkio grafikas</Typography>
+      </Box>
+      <Box height={500} display="flex">
         <Bar
           data={graphData}
           options={{
@@ -81,10 +83,10 @@ const AverageGraph: React.FC<AverageGraphProps> = ({ answers }) => {
               y: {
                 beginAtZero: true,
                 max: 20,
-                title: { display: true, text: "Percentage (%)" },
+                title: { display: true, text: "Procentai (%)" },
               },
               x: {
-                title: { display: true, text: "Fields" },
+                title: { display: true },
                 ticks: {
                   display: false, // Hide x-axis ticks because we use multiple datasets
                 },
@@ -94,10 +96,9 @@ const AverageGraph: React.FC<AverageGraphProps> = ({ answers }) => {
         />
         <AverageTable fieldAverages={fieldAverages} />
       </Box>
-        
-
     </Box>
   );
+  
 };
 
 export default AverageGraph;

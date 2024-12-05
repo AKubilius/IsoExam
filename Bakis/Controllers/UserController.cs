@@ -31,55 +31,16 @@ namespace Bakis.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
+        public async Task<ActionResult<UserProfileDto>> GetCurrentUserAsync()
         {
             string userId = getCurrentUserId();
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("User not authenticated");
             }
+            var User = await _databaseContext.Users.FindAsync(userId);
 
-            var user = await _databaseContext.Users
-     .Include(u => u.ExamAttempts) // Include ExamAttempts
-         .ThenInclude(e => e.Answers) // Include Answers for ExamAttempts
-     .FirstOrDefaultAsync(u => u.Id == userId);
-
-
-
-            if (user == null)
-            {
-                return NotFound("User not found");
-            }
-
-            // Map to DTO
-            var userDto = new UserAnswerDto
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Surname = user.Surname,
-                BirthDate = user.BirthDate,
-                Age = user.Age,
-                Email = user.Email,
-                Position = user.Position,
-                CompanyName = user.CompanyName,
-                ExamAttempts = user.ExamAttempts.Select(e => new ExamAttemptDto
-                {
-                    Id = e.Id,
-                    AttemptedAt = e.AttemptedAt,
-                    TimeTaken = e.TimeTaken,
-                    Score = e.Score,
-                    Status = e.Status,
-                    Answers = e.Answers.Select(a => new AnswerDto
-                    {
-                        QuestionId = a.Id,
-                        PolicyDefined = a.PolicyDefined,
-                        ControlImplemented = a.ControlImplemented,
-                        ControlAutomated = a.ControlAutomated,
-                        ControlReported = a.ControlReported
-                        }).ToList()
-                }).ToList()
-            };
-            return Ok(userDto);
+            return Ok(User);
         }
 
 
@@ -92,7 +53,28 @@ namespace Bakis.Controllers
 
         // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public async Task<User> UpdateUserAsync(User updatedUser)
+        public async Task<User> UpdateUserAsync(UserProfileDto updatedUser)
+        {
+
+
+            var existingUser = await _databaseContext.Users.FindAsync(updatedUser.Id);
+            if (existingUser == null)
+                throw new KeyNotFoundException("User not found");
+
+            existingUser.Name = updatedUser.Name;
+            existingUser.Surname = updatedUser.Surname;
+            existingUser.Email = updatedUser.Email;
+            existingUser.Position = updatedUser.Position;
+            existingUser.CompanyName = updatedUser.CompanyName;
+
+            _databaseContext.Users.Update(existingUser);
+            await _databaseContext.SaveChangesAsync();
+            return existingUser;
+        }
+
+        // PUT api/<UserController>/5
+        [HttpPut("edit")]
+        public async Task<User> UpdateUser(UserProfileDto updatedUser)
         {
             var existingUser = await _databaseContext.Users.FindAsync(updatedUser.Id);
             if (existingUser == null)
@@ -100,8 +82,6 @@ namespace Bakis.Controllers
 
             existingUser.Name = updatedUser.Name;
             existingUser.Surname = updatedUser.Surname;
-            existingUser.BirthDate = updatedUser.BirthDate;
-            existingUser.Age = updatedUser.Age;
             existingUser.Email = updatedUser.Email;
             existingUser.Position = updatedUser.Position;
             existingUser.CompanyName = updatedUser.CompanyName;

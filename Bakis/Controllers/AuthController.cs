@@ -40,6 +40,7 @@ namespace Bakis.Controllers
             var newUser = new User
             {
                 Email = registerUserDto.Email,
+                Name = registerUserDto.UserName,
                 UserName = registerUserDto.UserName,
                 Position = registerUserDto.Position,
                 CompanyName = registerUserDto.CompanyName,

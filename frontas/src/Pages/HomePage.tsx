@@ -11,7 +11,7 @@ export default function HomePage() {
     <Home/>
     <Banner/>
     
-    <AboutUs/>
+    
 
     </>
   )

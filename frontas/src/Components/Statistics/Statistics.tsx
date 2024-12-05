@@ -45,6 +45,7 @@ const GraphPage: React.FC = () => {
     
             // Load answers from sessionStorage
             const savedAnswers = sessionStorage.getItem('answers');
+            console.log(savedAnswers);
             let initialAnswers: Answer[];
     
             if (savedAnswers) {
@@ -72,7 +73,6 @@ const GraphPage: React.FC = () => {
 
   return (
     <Box>
-      <h1>Graphs</h1>
       <BarComponent questions={questions} answers={answers} />
       <AverageGraph answers={answers}/>
       

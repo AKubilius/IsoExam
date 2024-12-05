@@ -17,6 +17,7 @@ import ProtectedRoute from './Components/ProtectedRoute/ProtectedRoute'; // Impo
 
 import { DataProvider } from "../src/Components/DataContext/DataContext";
 import { NotificationProvider } from './Components/ProtectedRoute/NotificationProvider';
+import DocumentPage from './Pages/DocumentPage';
 
 const logged = sessionStorage.getItem("token");
 
@@ -32,6 +33,14 @@ root.render(
           <Route path="/" element={<Navigate replace to="/home" />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/home" element={<HomePage />} />
+          <Route 
+            path="/documents" 
+            element={
+              <ProtectedRoute>
+                <DocumentPage />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/exam" 
             element={

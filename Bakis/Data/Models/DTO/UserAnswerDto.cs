@@ -12,5 +12,14 @@
         public string? CompanyName { get; set; }
         public ICollection<ExamAttemptDto> ExamAttempts { get; set; }
     }
+    public class UserProfileDto
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string? Surname { get; set; }
+        public string Email { get; set; }
+        public string? Position { get; set; }
+        public string? CompanyName { get; set; }
+    }
 
 }

@@ -10,14 +10,14 @@ const ErrorMessages = {
   MISSMATCHING_PASSWORDS: 'Slaptažodžiai turi sutapti',
   INCORRECT_PASSWORD_FORMAT:
     'Slaptažodį turi sudaryt bent 8 simboliai, įskaitant skaitmenį, didžiąją raidę ir simbolį',
-    WRONG_LOGIN:'Labas',
+    WRONG_LOGIN:'Blogas prisijungimas',
   INCORRECT_EMAIL_FORMAT: 'Netinkamas El. Paštas',
   UNEXPECTED_ERROR: 'Įvyko netikėta klaida, bandykite vėliau',
 };
 const SUCCESS_MESSAGE = 'Registracija patvirtinta';
 
 const RegisterLoginPage: React.FC = () => {
-  const [showPassword, setShowPassword] = React.useState(false);
+
   const [errorMessage, setErrorMessage] = useState("");
 
   const [isRegistrationSuccessful, setIsRegistrationSuccessful] =

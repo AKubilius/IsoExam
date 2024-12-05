@@ -17,11 +17,7 @@ namespace Bakis.Controllers
         [HttpPost("send-message")]
         public async Task<IActionResult> SendMessage([FromBody] ContactRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Message))
-            {
-                return BadRequest("Email and message are required.");
-            }
-
+         
             try
             {
                 // Fixed recipient (admin)

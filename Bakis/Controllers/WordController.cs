@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Bakis.Data.Models;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Bakis.Data.Models.DTO;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -23,6 +24,11 @@ public class UploadController : ControllerBase
     {
         _databaseContext = context;
         _authorizationService = authorizationService;
+    }
+
+    private string getCurrentUserId()
+    {
+        return User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
     }
 
     [HttpPost]
@@ -64,83 +70,81 @@ public class UploadController : ControllerBase
     }
 
 
-[HttpGet("export")]
-[Authorize]
-public async Task<IActionResult> ExportAnswersToWord()
-{
-    // Retrieve the User ID from the claims
-    var userId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-    if (string.IsNullOrEmpty(userId))
+    [HttpPost("export")]
+    public async Task<IActionResult> ExportAnswersToWord([FromBody] ExportRequest exportRequest)
     {
-        return Unauthorized("User ID not found in the token.");
-    }
+        var risk = exportRequest.Risk;
+        var checkedControls = exportRequest.CheckedControls;
 
-    // Retrieve the user information from the database
-    var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
-    if (user == null)
-    {
-        return NotFound("User not found.");
-    }
-
-    // Retrieve the answers for the user
-    var answers = await _databaseContext.Answers
-                                .Where(a => a.UserId == userId)
-                                .ToListAsync();
-
-    if (!answers.Any())
-    {
-        return NotFound("No answers found for this user.");
-    }
-
-    using (var memoryStream = new MemoryStream())
-    {
-        // Create a WordprocessingDocument
-        using (var wordDocument = WordprocessingDocument.Create(
-            memoryStream,
-            DocumentFormat.OpenXml.WordprocessingDocumentType.Document,
-            true))
+        // Retrieve the User ID from the claims
+        var userId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (string.IsNullOrEmpty(userId))
         {
-            // Add a main document part
-            var mainPart = wordDocument.AddMainDocumentPart();
-            mainPart.Document = new Document();
-            var body = mainPart.Document.AppendChild(new Body());
-
-            // Add user information at the top of the document
-            AddParagraph(body, "User Information", isBold: true, fontSize: 14);
-            AddParagraph(body, $"Name: {user.Name} {user.Surname}");
-            AddParagraph(body, $"Email: {user.Email}");
-            AddParagraph(body, $"Position: {user.Position ?? "N/A"}");
-            AddParagraph(body, $"Company: {user.CompanyName ?? "N/A"}");
-            AddParagraph(body, ""); // Add a blank line
-
-            //// Insert the report title
-            //AddParagraph(body, "User Answers Report", isBold: true, fontSize: 16);
-
-            //// Add answers to the document
-            //foreach (var answer in answers)
-            //{
-            //    AddParagraph(body, $"Question ID: {answer.QuestionId}");
-            //    AddParagraph(body, $"Policy Defined: {answer.PolicyDefined ?? "N/A"}");
-            //    AddParagraph(body, $"Control Implemented: {answer.ControlImplemented ?? "N/A"}");
-            //    AddParagraph(body, $"Control Automated: {answer.ControlAutomated ?? "N/A"}");
-            //    AddParagraph(body, $"Control Reported: {answer.ControlReported ?? "N/A"}");
-            //    AddParagraph(body, "-------------------------------------");
-            //}
-
-            // Save the document
-            mainPart.Document.Save();
+            return Unauthorized("User ID not found in the token.");
         }
 
-        memoryStream.Seek(0, SeekOrigin.Begin);
+        // Retrieve the user information from the database
+        var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
 
-        return File(memoryStream.ToArray(),
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "UserAnswersReport.docx");
+
+        using (var memoryStream = new MemoryStream())
+        {
+            // Create a WordprocessingDocument
+            using (var wordDocument = WordprocessingDocument.Create(
+                memoryStream,
+                DocumentFormat.OpenXml.WordprocessingDocumentType.Document,
+                true))
+            {
+                // Add a main document part
+                var mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new Document();
+                var body = mainPart.Document.AppendChild(new Body());
+
+                // Add user information at the top of the document
+                AddParagraph(body, "User Information", isBold: true, fontSize: 14);
+                AddParagraph(body, $"Name: {user.Name} {user.Surname}");
+                AddParagraph(body, $"Email: {user.Email}");
+                AddParagraph(body, $"Position: {user.Position ?? "N/A"}");
+                AddParagraph(body, $"Company: {user.CompanyName ?? "N/A"}");
+                AddParagraph(body, ""); // Add a blank line
+
+                // Insert the report title
+                AddParagraph(body, "CIS kontrolių atitiktis", isBold: true, fontSize: 16);
+                AddParagraph(body, $"Iš viso įgyvendinta:{risk}%", isBold: true, fontSize: 16);
+
+                // Add the checked controls with true values
+                AddParagraph(body, "Įgyvendinti:", isBold: true, fontSize: 14);
+                foreach (var control in checkedControls.Where(c => c.Value))
+                {
+                    AddParagraph(body, $"- {control.Key}");
+                }
+
+                // Add the checked controls with false values
+                AddParagraph(body, "Neįgyvendinti:", isBold: true, fontSize: 14);
+                foreach (var control in checkedControls.Where(c => !c.Value))
+                {
+                    AddParagraph(body, $"- {control.Key}");
+                }
+
+                // Save the document
+                mainPart.Document.Save();
+            }
+
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            return File(memoryStream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "UserAnswersReport.docx");
+        }
     }
-}
 
 
-private void AddParagraph(Body body, string text, bool isBold = false, int fontSize = 12)
+
+    private void AddParagraph(Body body, string text, bool isBold = false, int fontSize = 12)
     {
         var runProperties = new RunProperties();
 

@@ -2,16 +2,16 @@ import React from 'react';
 import { Box, Typography, Grid, Paper, Container } from '@mui/material';
 
 const features = [
-  { title: 'High Quality', description: 'We provide top-notch services.' },
-  { title: 'Reliable Support', description: 'We are here for you 24/7.' },
-  { title: 'Affordable Pricing', description: 'Best prices in the market.' },
+  { title: 'Aukšta kokybė', description: 'Mes teikiame aukštos klasės paslaugas.' },
+  { title: 'Patikima pagalba', description: 'Į mus galite kreiptis 24/7.' },
+  { title: 'Prieinamos kainos', description: 'Geriausios kainos rinkoje.' },
 ];
 
 const Banner: React.FC = () => (
   <Box sx={{ py: 8 }}>
     <Container maxWidth="lg">
       <Typography variant="h4" align="center" gutterBottom>
-        Our Features
+        Mūsų prioritetai
       </Typography>
       <Grid container spacing={4}>
         {features.map((feature, index) => (
