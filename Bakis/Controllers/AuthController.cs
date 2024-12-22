@@ -1,6 +1,7 @@
 ﻿using Bakis.Auth;
 using Bakis.Auth.Model;
 using Bakis.Data.Models;
+using Bakis.Data.Models.DTO;
 using Bakis.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -66,10 +67,39 @@ namespace Bakis.Controllers
             if (!isPasswordValid)
                 return BadRequest("User name or password is invalid.");
 
+            // Generate 2FA Code
+            var twoFactorCode = GenerateTwoFactorCode();
+            user.TwoFactorCode = twoFactorCode; // Assuming your user model has a TwoFactorCode property
+            user.TwoFactorExpiry = DateTime.UtcNow.AddMinutes(5); // Assuming your user model has a TwoFactorExpiry property
+            await _userManager.UpdateAsync(user);
+
+            // Send the 2FA code to the user's email
+            await _emailService.SendEmailAsync(user.Email, "Your Login Verification Code", $"Your verification code is: {twoFactorCode}");
+
+            return Ok(new { Message = "Verification code sent to your email. Please verify to complete login." });
+        }
+
+        [HttpPost]
+        [Route("verify-2fa")]
+        public async Task<ActionResult> VerifyTwoFactorCode(TwoFactorDto twoFactorDto)
+        {
+            var user = await _userManager.FindByNameAsync(twoFactorDto.UserName);
+            if (user == null)
+                return BadRequest("Invalid user.");
+
+            // Check if the code matches and is not expired
+            if (user.TwoFactorCode != twoFactorDto.Code || user.TwoFactorExpiry < DateTime.UtcNow)
+                return BadRequest("Invalid or expired verification code.");
+
+            // Clear the TwoFactorCode and expiry to prevent reuse
+            user.TwoFactorCode = null;
+            user.TwoFactorExpiry = null;
+            await _userManager.UpdateAsync(user);
+
             var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id)
-                };
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id)
+    };
             var userIdentity = new ClaimsIdentity(claims, "login");
             var principal = new ClaimsPrincipal(userIdentity);
 
@@ -83,42 +113,15 @@ namespace Bakis.Controllers
 
             var accessToken = _jwtTokenService.CreateAccessToken(user.UserName, user.Id, roles);
 
-            return Ok(new SuccessfulLoginDto(accessToken, loginDto.UserName, isAdmin));
+            return Ok(new SuccessfulLoginDto(accessToken, twoFactorDto.UserName, isAdmin));
         }
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+
+        private string GenerateTwoFactorCode()
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user == null)
-            {
-                return NoContent();
-            }
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-            var callbackUrl = $"http://localhost:3000/reset-password?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(user.Email)}";
-            await _emailService.SendEmailAsync(user.Email, "Reset Password", $"Pasikeiskite slaptažodį <a href='{callbackUrl}'>here</a>");
-
-            return Ok("Laiškas išsiųstas į nurodytą paštą");
+            var random = new Random();
+            return random.Next(100000, 999999).ToString(); // Generates a 6-digit code
         }
 
-        [HttpPost("confirm-reset-password")]
-        public async Task<IActionResult> ConfirmResetPassword([FromBody] ConfirmResetPasswordRequest request)
-        {
-            var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user == null)
-            {
-                return BadRequest("Netinkamas el.paštas");
-            }
-
-            var resetPasswordResult = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
-
-            if (!resetPasswordResult.Succeeded)
-            {
-                return BadRequest("Nepavyko pakeisti slaptažodžio");
-            }
-
-            return Ok();
-        }
+        
     }
 }

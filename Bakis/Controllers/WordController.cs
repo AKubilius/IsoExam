@@ -9,9 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using System.IO;
 using System.Threading.Tasks;
 using Bakis.Data.Models;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Bakis.Data.Models.DTO;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
+using Document = QuestPDF.Fluent.Document;
+
 
 [Route("api/[controller]")]
 [ApiController]
@@ -26,149 +28,124 @@ public class UploadController : ControllerBase
         _authorizationService = authorizationService;
     }
 
-    private string getCurrentUserId()
+[HttpPost("export")]
+public async Task<IActionResult> ExportAnswersToPdf([FromBody] ExportRequest exportRequest)
+{
+    var risk = exportRequest.Risk;
+    var checkedControls = exportRequest.CheckedControls;
+
+    // Retrieve the User ID from the claims
+    var userId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+    if (string.IsNullOrEmpty(userId))
     {
-        return User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        return Unauthorized("User ID not found in the token.");
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Upload(IFormFile file)
+    // Retrieve the user information from the database
+    var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+    if (user == null)
     {
-        if (file == null || file.Length == 0)
-            return BadRequest("File is empty or not provided.");
+        return NotFound("User not found.");
+    }
 
-        try
+    var pdfStream = new MemoryStream();
+    Document.Create(container =>
+    {
+        container.Page(page =>
         {
-            using (var stream = new MemoryStream())
+            page.Margin(50); // Add margins around the page
+            page.Content().Column(column =>
             {
-                await file.CopyToAsync(stream);
-                stream.Position = 0;
+                // Header Section
+                column.Item().Text("Vartotojo informacija")
+                    .FontSize(20)
+                    .Bold()
+                    .AlignCenter();
 
-                // Use DocumentConverter with the updated API
-                var converter = new DocumentConverter();
-                var result = converter.ConvertToHtml(stream); // This method now returns HTML
+                column.Item().Element(container =>
+                {
+                    container.PaddingTop(10).AlignCenter().Text($"Vardas: {user.Name ?? "Nenurodyta"}")
+                        .FontSize(14);
+                });
 
-                var extractedText = result.Value; // Extracted HTML content from the .docx file
+                column.Item().Element(container =>
+                {
+                    container.AlignCenter().Text($"Paštas: {user.Email ?? "Nenurodyta"}")
+                        .FontSize(14);
+                });
 
-                // If plain text is needed, you can strip HTML tags, or use a different approach
-                var plainText = HtmlToPlainText(extractedText);
+                column.Item().Element(container =>
+                {
+                    container.AlignCenter().Text($"Pozicija: {user.Position ?? "Nenurodyta"}")
+                        .FontSize(14);
+                });
 
-                // Return the plain text as JSON
-                return Ok(new { text = plainText });
-            }
-        }
-        catch
-        {
-            return StatusCode(500, "An error occurred while processing the file.");
-        }
-    }
+                column.Item().Element(container =>
+                {
+                    container.AlignCenter().Text($"Kompanija: {user.CompanyName ?? "Nenurodyta"}")
+                        .FontSize(14);
+                });
 
-    // Helper method to strip HTML tags if plain text is needed
-    private string HtmlToPlainText(string html)
-    {
-        return System.Text.RegularExpressions.Regex.Replace(html, "<.*?>", string.Empty);
-    }
+                // Spacer
+                column.Item().Element(container =>
+                {
+                    container.PaddingTop(10).Text("\n");
+                });
 
+                // Main Section Header
+                column.Item().Element(container =>
+                {
+                    container.PaddingTop(10).AlignCenter().Text("CIS kontrolų atitiktis: " + $"{risk}%")
+                        .FontSize(18)
+                        .Bold();
+                });
 
-    [HttpPost("export")]
-    public async Task<IActionResult> ExportAnswersToWord([FromBody] ExportRequest exportRequest)
-    {
-        var risk = exportRequest.Risk;
-        var checkedControls = exportRequest.CheckedControls;
+                // Spacer
+                column.Item().Element(container =>
+                {
+                    container.PaddingTop(10).Text("\n");
+                });
 
-        // Retrieve the User ID from the claims
-        var userId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-        if (string.IsNullOrEmpty(userId))
-        {
-            return Unauthorized("User ID not found in the token.");
-        }
+                // Implemented Controls Section
+                column.Item().Element(container =>
+                {
+                    container.PaddingTop(20).Text("Parengti dokumentai:")
+                        .FontSize(16)
+                        .Bold();
+                });
 
-        // Retrieve the user information from the database
-        var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null)
-        {
-            return NotFound("User not found.");
-        }
-
-
-        using (var memoryStream = new MemoryStream())
-        {
-            // Create a WordprocessingDocument
-            using (var wordDocument = WordprocessingDocument.Create(
-                memoryStream,
-                DocumentFormat.OpenXml.WordprocessingDocumentType.Document,
-                true))
-            {
-                // Add a main document part
-                var mainPart = wordDocument.AddMainDocumentPart();
-                mainPart.Document = new Document();
-                var body = mainPart.Document.AppendChild(new Body());
-
-                // Add user information at the top of the document
-                AddParagraph(body, "User Information", isBold: true, fontSize: 14);
-                AddParagraph(body, $"Name: {user.Name} {user.Surname}");
-                AddParagraph(body, $"Email: {user.Email}");
-                AddParagraph(body, $"Position: {user.Position ?? "N/A"}");
-                AddParagraph(body, $"Company: {user.CompanyName ?? "N/A"}");
-                AddParagraph(body, ""); // Add a blank line
-
-                // Insert the report title
-                AddParagraph(body, "CIS kontrolių atitiktis", isBold: true, fontSize: 16);
-                AddParagraph(body, $"Iš viso įgyvendinta:{risk}%", isBold: true, fontSize: 16);
-
-                // Add the checked controls with true values
-                AddParagraph(body, "Įgyvendinti:", isBold: true, fontSize: 14);
                 foreach (var control in checkedControls.Where(c => c.Value))
                 {
-                    AddParagraph(body, $"- {control.Key}");
+                    column.Item().Text($"- {control.Key}")
+                        .FontSize(14);
                 }
 
-                // Add the checked controls with false values
-                AddParagraph(body, "Neįgyvendinti:", isBold: true, fontSize: 14);
+                // Spacer
+                column.Item().Text("\n");
+
+                // Not Implemented Controls Section
+                column.Item().Element(container =>
+                {
+                    container.PaddingTop(20).Text("Neparengti dokumentai")
+                        .FontSize(16)
+                        .Bold();
+                });
+
                 foreach (var control in checkedControls.Where(c => !c.Value))
                 {
-                    AddParagraph(body, $"- {control.Key}");
+                    column.Item().Text($"- {control.Key}")
+                        .FontSize(14);
                 }
+            });
+        });
+    }).GeneratePdf(pdfStream);
 
-                // Save the document
-                mainPart.Document.Save();
-            }
+    pdfStream.Seek(0, SeekOrigin.Begin);
 
-            memoryStream.Seek(0, SeekOrigin.Begin);
-
-            return File(memoryStream.ToArray(),
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "UserAnswersReport.docx");
-        }
-    }
+    return File(pdfStream.ToArray(), "application/pdf", "UserAnswersReport.pdf");
+}
 
 
-
-    private void AddParagraph(Body body, string text, bool isBold = false, int fontSize = 12)
-    {
-        var runProperties = new RunProperties();
-
-        // Apply bold formatting if specified
-        if (isBold)
-        {
-            runProperties.AppendChild(new Bold());
-        }
-
-        // Set font size
-        runProperties.AppendChild(new FontSize { Val = (fontSize * 2).ToString() });
-
-        // Create the Run and Text
-        var run = new Run();
-        run.AppendChild(runProperties);
-        run.AppendChild(new Text(text) { Space = SpaceProcessingModeValues.Preserve });
-
-        // Create the Paragraph and add the Run
-        var paragraph = new Paragraph();
-        paragraph.AppendChild(run);
-
-        // Add the Paragraph to the Body
-        body.AppendChild(paragraph);
-    }
 
 
 }

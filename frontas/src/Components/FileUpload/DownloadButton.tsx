@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@mui/material";
-import { postRequest } from "../Api/Api"; // Update this to POST
+import { postRequest } from "../Api/Api"; // Ensure this is correct
 
 interface DownloadButtonProps {
   riskAddressed: number;
@@ -20,12 +20,12 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ riskAddressed, checkedC
 
       // Create a blob from the response data and download it
       const blob = new Blob([response], {
-        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        type: "application/pdf",
       });
       const urlBlob = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = urlBlob;
-      link.download = "UserAnswersReport.docx";
+      link.download = "UserAnswersReport.pdf";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link); // Clean up the link element

@@ -1,5 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Bakis.Services;
+using Bakis.Data.Models;
+using Microsoft.AspNetCore.Identity;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Bakis.Data;
+using Microsoft.AspNetCore.Authorization;
+using DocumentFormat.OpenXml.InkML;
 
 namespace Bakis.Controllers
 {
@@ -8,16 +14,31 @@ namespace Bakis.Controllers
     public class ContactController : ControllerBase
     {
         private readonly IEmailService _emailService;
-
-        public ContactController(IEmailService emailService)
+        private readonly ApplicationDbContext _databaseContext;
+        public ContactController(IEmailService emailService, ApplicationDbContext context)
         {
             _emailService = emailService;
+            _databaseContext = context;
+        }
+
+
+
+
+        private string getCurrentUserId()
+        {
+            return User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
         }
 
         [HttpPost("send-message")]
         public async Task<IActionResult> SendMessage([FromBody] ContactRequest request)
         {
-         
+            if (request.Email == "")
+            {
+                var userId = getCurrentUserId();
+                var user = await _databaseContext.Users.FindAsync(userId);
+                request.Email = user.Email;
+            }
+
             try
             {
                 // Fixed recipient (admin)

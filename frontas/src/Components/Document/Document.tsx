@@ -19,6 +19,7 @@ export default function Documents() {
     "Rolių ir atsakomybių politika",
     "Saugių sistemų kūrimo politika",
     "Taikomumo pareiškimo politika",
+    "Verslo tęstinumo planas"
   ];
 
   interface Answer {
@@ -70,7 +71,7 @@ export default function Documents() {
   return (
     <Paper sx={{ padding: 2, maxWidth: 600, margin: "auto", backgroundColor: "#f5f5f5" }}>
       <Typography variant="h6" align="center" gutterBottom>
-        CIS Kontrolės Sąrašas
+      ISO 27001 dokumentai
       </Typography>
       <Box>
         {controls.map((control) => (

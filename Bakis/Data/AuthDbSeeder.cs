@@ -18,30 +18,30 @@ namespace Bakis.Data
 
         public async Task SeedAsync()
         {
-            await AddDefaultRoles();
-            await AddAdminUser();
+            //await AddDefaultRoles();
+            //await AddAdminUser();
         }
 
-        private async Task AddAdminUser()
-        {
-            var newAdminUser = new User()
-            {
-                UserName = "admin1",
-                Email = "admin@admin.com"
-            };
+        //private async Task AddAdminUser()
+        //{
+        //    var newAdminUser = new User()
+        //    {
+        //        UserName = "admin1",
+        //        Email = "admin@admin.com"
+        //    };
 
-            var existingAdminUser = await _userManager.FindByNameAsync(newAdminUser.UserName);
+        //    var existingAdminUser = await _userManager.FindByNameAsync(newAdminUser.UserName);
 
-            if (existingAdminUser == null)
-            {
-                var createAdminUserResult = await _userManager.CreateAsync(newAdminUser, "VerySafePassword1!");
-                if (createAdminUserResult.Succeeded)
-                {
-                    await _userManager.AddToRoleAsync(newAdminUser, Roles.Admin);
+        //    if (existingAdminUser == null)
+        //    {
+        //        var createAdminUserResult = await _userManager.CreateAsync(newAdminUser, "VerySafePassword1!");
+        //        if (createAdminUserResult.Succeeded)
+        //        {
+        //            await _userManager.AddToRoleAsync(newAdminUser, Roles.Admin);
 
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
 
         private async Task AddDefaultRoles()
         {

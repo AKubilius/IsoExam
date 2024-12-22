@@ -42,7 +42,7 @@ const GraphComponent: React.FC<GraphComponentProps> = ({ questions, answers }) =
   }, [answers]);
 
   const graphData = {
-    labels: ['Risk Addressed', 'Risk Accepted'],
+    labels: ['Rizika išspręsta', 'Rizika priimta'], 
     datasets: [
       {
         data: [riskPercentages.riskAddressed, riskPercentages.riskAccepted],

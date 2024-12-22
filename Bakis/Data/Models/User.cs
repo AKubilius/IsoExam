@@ -17,6 +17,8 @@ namespace Bakis.Data.Models
         public string Email { get; set; }
         public string? Position { get; set; } = null;
         public string? CompanyName { get; set; } = null;
+        public string? TwoFactorCode { get; set; }
+        public DateTime? TwoFactorExpiry { get; set; }
         public virtual ICollection<ExamAttempt> ExamAttempts { get; set; }
     }
 }

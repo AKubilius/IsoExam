@@ -1,10 +1,12 @@
 ﻿using System.Net.Mail;
 using System.Net;
+using Bakis.Data.Models;
 
 namespace Bakis.Services
 {
     public class EmailService : IEmailService
     {
+
         public async Task SendEmailAsync(string to, string subject, string message)
         {
             try
@@ -13,10 +15,10 @@ namespace Bakis.Services
                 {
                     Host = "smtp.gmail.com",
                     Port = 587,
-                    Credentials = new NetworkCredential("cinemaconnectapi@gmail.com", "mscxfkvtbhdwvgxd"),
+                    Credentials = new NetworkCredential("isoexamdonotreply@gmail.com", "vtkw aiml atxe xvvc"),
                     EnableSsl = true
                 };
-                var emailMessage = new MailMessage("cinemaconnectapi@gmail.com", to, subject, message)
+                var emailMessage = new MailMessage("isoexamdonotreply@gmail.com", to, subject, message)
                 {
                     IsBodyHtml = true
                 };
