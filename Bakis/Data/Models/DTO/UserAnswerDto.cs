@@ -28,5 +28,10 @@
         public string Code { get; set; }
     }
 
+    public class ResendTwoFactorDto
+    {
+        public string UserName { get; set; }
+    }
+
 
 }

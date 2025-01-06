@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -26,6 +26,23 @@ const RegisterLoginPage: React.FC = () => {
   const [isVerificationRequired, setIsVerificationRequired] = useState(false);
   const [verificationMessage, setVerificationMessage] = useState('');
   const [loginData, setLoginData] = useState({ username: '', password: '' });
+  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
+
+  // Countdown timer
+  useEffect(() => {
+    if (isVerificationRequired && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => Math.max(prev - 1, 0));
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isVerificationRequired, timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
 
   const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,13 +53,13 @@ const RegisterLoginPage: React.FC = () => {
       username: (formData.get('userName') as string) || '',
       password: (formData.get('password') as string) || '',
     };
-    
 
     try {
       const { data } = await api.post('/api/login', loginData);
       setLoginData(loginData); // Save loginData for 2FA verification
       setIsVerificationRequired(true); // Show the verification code form
       setVerificationMessage(data.Message || 'Patvirtinimo kodas išsiųstas');
+      setTimeLeft(300); // Set timer to 5 minutes (300 seconds)
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         error?.response?.status === 400
@@ -75,9 +92,26 @@ const RegisterLoginPage: React.FC = () => {
       window.location.href = '/';
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
-        error?.response?.status === 400
-          ? setErrorMessage(ErrorMessages.INVALID_CODE)
-          : setErrorMessage(ErrorMessages.UNEXPECTED_ERROR);
+        if (error?.response?.data?.message === 'Verification code has expired') {
+          setErrorMessage(ErrorMessages.INVALID_CODE);
+        } else {
+          setErrorMessage(ErrorMessages.UNEXPECTED_ERROR);
+        }
+      }
+    }
+    setIsLoading(false);
+  };
+
+  const handleResendCode = async () => {
+    setIsLoading(true);
+    setErrorMessage('');
+    try {
+      const { data } = await api.post('/api/resend-2fa', { userName: loginData.username });
+      setVerificationMessage(data.Message || 'Patvirtinimo kodas išsiųstas iš naujo.');
+      setTimeLeft(300); // Reset timer to 5 minutes
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        setErrorMessage(ErrorMessages.UNEXPECTED_ERROR);
       }
     }
     setIsLoading(false);
@@ -125,8 +159,17 @@ const RegisterLoginPage: React.FC = () => {
               autoFocus
             />
             <Typography variant="body2" sx={{ mt: 1 }}>
-              {verificationMessage}
+              {verificationMessage} Laikas liko: {formatTime(timeLeft)}
             </Typography>
+            <Button
+              fullWidth
+              variant="outlined"
+              sx={{ mt: 2 }}
+              onClick={handleResendCode}
+              disabled={isLoading}
+            >
+              Gauti naują kodą
+            </Button>
           </>
         )}
         {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
