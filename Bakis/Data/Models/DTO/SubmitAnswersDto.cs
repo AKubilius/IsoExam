@@ -31,4 +31,13 @@
         public Dictionary<string, bool> CheckedControls { get; set; }
     }
 
+    
+
+        public class QuestionDTO
+    {
+        public int Id { get; set; }
+        public string Detail { get; set; }
+        public int Group { get; set; }
+        // Other fields as needed
+    }
 }

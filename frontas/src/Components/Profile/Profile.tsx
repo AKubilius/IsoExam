@@ -7,6 +7,7 @@ import UserList from './UserList';
 import Container from '@mui/material/Container/Container';
 import Paper from '@mui/material/Paper/Paper';
 import { Box } from '@mui/material';
+import QuestionsList from './QuestionList';
 
 const ProfilePage: React.FC = () => {
   const [profile, setProfile] = useState({
@@ -19,7 +20,7 @@ const ProfilePage: React.FC = () => {
   const [originalProfile, setOriginalProfile] = useState(profile); // Store original profile
 
   const isAdmin = sessionStorage.getItem('admin') === 'true'
-console.log(isAdmin)
+
 
   // Fetch user data from the API
   useEffect(() => {
@@ -66,19 +67,21 @@ console.log(isAdmin)
 
   return (
     <Container maxWidth="sm">
+      
     <Paper sx={{ padding: 4, marginTop: 4 }}>
       <Box sx={{display:'flex',flexDirection:'column'}}>
-      <ProfileForm
+      {!isAdmin && <ProfileForm
 
 profile={profile}
 isEditing={isEditing}
 handleInputChange={handleInputChange}
 handleEditClick={handleEditClick}
 handleCancelClick={handleCancelClick} // Pass cancel handler
-/>
+/> }
+      
 
 </Box>
-{isAdmin && <UserList />}
+{isAdmin && <><UserList/> <QuestionsList/> </>}
 
     </Paper>
   </Container>
